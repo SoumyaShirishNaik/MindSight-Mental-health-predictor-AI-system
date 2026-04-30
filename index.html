@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MindSight – Mental Health AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<div class="bg-mesh"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="16" stroke="url(#ng1)" stroke-width="1.5"/>
+        <path d="M8 17 Q12 8 17 17 Q22 26 26 17" stroke="url(#ng2)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <circle cx="17" cy="17" r="3" fill="url(#ng1)" opacity="0.6"/>
+        <defs>
+          <linearGradient id="ng1" x1="0" y1="0" x2="34" y2="34"><stop stop-color="#7c6df0"/><stop offset="1" stop-color="#3dd6c8"/></linearGradient>
+          <linearGradient id="ng2" x1="8" y1="17" x2="26" y2="17"><stop stop-color="#7c6df0"/><stop offset="1" stop-color="#3dd6c8"/></linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <span class="nav-title">MindSight</span>
+    
+  </div>
+  <div class="nav-links">
+    <a href="#analyze"   class="nav-link active">Analyze</a>
+    <a href="#compare"   class="nav-link">Compare</a>
+    <a href="#journal"   class="nav-link">Journal</a>
+    <a href="#dashboard" class="nav-link">Dashboard</a>
+    <a href="#weekly"    class="nav-link">Weekly</a>
+    <a href="#about"     class="nav-link">About</a>
+  </div>
+  <div class="nav-right">
+    <button class="export-btn" onclick="exportCSV()" title="Export predictions as CSV">⬇ Export</button>
+    
+  </div>
+</nav>
+
+<!-- HERO / ANALYZE -->
+<section class="hero" id="analyze">
+  <div class="hero-content">
+    
+    <h1 class="hero-title">Understand Your<br><em>Mental Wellness</em></h1>
+    
+    
+  </div>
+
+  <div class="input-card">
+    <div class="input-card-header">
+      <div class="ich-left"><span class="ich-icon">✍️</span><span>Share how you're feeling</span></div>
+      <span id="char-count" class="char-count">0 / 512</span>
+    </div>
+    <textarea id="text-input" class="text-input"
+      placeholder="I've been feeling overwhelmed lately. My anxiety makes it hard to focus, and the constant worrying is exhausting..."
+      maxlength="512" rows="5"></textarea>
+    <div class="input-note-row">
+      <input id="user-note" class="note-input" type="text" placeholder="Optional: add a personal note for your records..." maxlength="100"/>
+    </div>
+    <div class="input-footer">
+      <div class="quick-fills">
+        <span class="qf-label">Try:</span>
+        <button class="qf-btn qf-dep" data-text="I feel completely hopeless and exhausted. Nothing brings me joy anymore and I can't get out of bed.">Depression</button>
+        <button class="qf-btn qf-anx" data-text="My heart races constantly and I can't stop worrying about everything that could go wrong.">Anxiety</button>
+        <button class="qf-btn qf-nor" data-text="Had a fantastic day! Feeling energetic, positive, and grateful for everything around me.">Normal</button>
+        <button class="qf-btn qf-str" data-text="Deadlines piling up, can't breathe, snapping at everyone, running on empty.">Stress</button>
+        <button class="qf-btn qf-ocd" data-text="I have to check the locks 20 times before I can sleep. The rituals consume hours of my day.">OCD</button>
+      </div>
+      <button id="analyze-btn" class="analyze-btn">
+        <span class="btn-text">Analyze</span>
+        <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results-section" class="results-section hidden">
+  <div id="result-banner" class="result-banner">
+    <div class="rb-left">
+      <span class="rb-label">Analysis Complete</span>
+      <span id="rb-prediction" class="rb-prediction">—</span>
+    </div>
+    <div class="rb-right">
+      <div id="rb-conf" class="rb-conf-badge">—</div>
+      <div id="rb-sev"  class="rb-sev-badge">—</div>
+      <div id="rb-time" class="rb-time-badge">—</div>
+      <button class="rb-feedback-btn" onclick="openFeedback()">Rate this</button>
+    </div>
+  </div>
+
+  <div class="results-grid">
+    <div class="result-card main-card" id="main-result">
+      <p class="result-label">PRIMARY DETECTION</p>
+      <div class="result-header">
+        <h2 id="pred-label" class="pred-label">—</h2>
+        <div class="confidence-ring-wrapper">
+          <svg class="confidence-ring" viewBox="0 0 90 90">
+            <circle class="ring-bg" cx="45" cy="45" r="38"/>
+            <circle class="ring-fill" id="ring-fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+          </svg>
+          <div class="ring-text">
+            <span id="conf-val" class="ring-pct">0%</span>
+            <span class="ring-sub">confidence</span>
+          </div>
+        </div>
+      </div>
+      <div class="sev-row">
+        <span id="sev-tag" class="sev-tag">Low</span>
+        <div class="sev-track"><div id="sev-fill" class="sev-fill"></div></div>
+        <span id="sev-text" class="sev-text-val">Low</span>
+      </div>
+      <p id="pred-desc" class="pred-desc">—</p>
+      <div class="inference-row"><span id="inf-time" class="inf-time"></span></div>
+    </div>
+
+    <div class="result-card reco-card">
+      <div class="card-title-row"><h3 class="card-title">Recommendations</h3><span class="card-icon">💡</span></div>
+      <div id="reco-list" class="reco-list"></div>
+    </div>
+
+    <div class="result-card dist-card">
+      <div class="card-title-row"><h3 class="card-title">Probability Distribution</h3><span class="card-icon">📊</span></div>
+      <div id="dist-bars" class="dist-bars"></div>
+    </div>
+
+    <div class="result-card top3-card">
+      <div class="card-title-row"><h3 class="card-title">Top Predictions</h3><span class="card-icon">🏆</span></div>
+      <div id="top3-list" class="top3-list"></div>
+    </div>
+
+    <div class="result-card token-card">
+      <div class="card-title-row"><h3 class="card-title">Key Words — Gradient Attention</h3><span class="card-icon">🔍</span></div>
+      <p class="token-hint">Brighter highlight = stronger influence on prediction</p>
+      <div id="token-viz" class="token-viz"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEEDBACK MODAL -->
+<div id="feedback-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Rate this Prediction</h3>
+      <button class="modal-close" onclick="closeFeedback()">✕</button>
+    </div>
+    <p class="modal-sub">Help us improve by telling us how accurate this was.</p>
+    <div class="fb-stars" id="fb-stars">
+      <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
+      <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span>
+    </div>
+    <label class="fb-label">Actual condition (optional)</label>
+    <select id="fb-actual" class="fb-select">
+      <option value="">— Select if known —</option>
+      <option>Normal</option><option>Depression</option><option>Anxiety</option>
+      <option>Bipolar Disorder</option><option>PTSD</option><option>OCD</option><option>Stress</option>
+    </select>
+    <label class="fb-label">Comment (optional)</label>
+    <textarea id="fb-comment" class="fb-textarea" placeholder="Any additional feedback..." rows="3"></textarea>
+    <button class="fb-submit" onclick="submitFeedback()">Submit Feedback</button>
+  </div>
+</div>
+
+<!-- COMPARE -->
+<section id="compare" class="compare-section">
+  <div class="section-header">
+    <div><p class="section-eyebrow">Multi-Text</p><h2 class="section-title">Side-by-Side Compare</h2></div>
+  </div>
+  <p class="compare-desc">Enter up to 3 different texts and compare the AI's predictions simultaneously.</p>
+  <div class="compare-inputs">
+    <div class="cmp-col">
+      <div class="cmp-num">1</div>
+      <textarea class="cmp-textarea" id="cmp1" placeholder="First text..." rows="4"></textarea>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-num">2</div>
+      <textarea class="cmp-textarea" id="cmp2" placeholder="Second text..." rows="4"></textarea>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-num">3</div>
+      <textarea class="cmp-textarea" id="cmp3" placeholder="Third text (optional)..." rows="4"></textarea>
+    </div>
+  </div>
+  <div style="text-align:center;margin:1.25rem 0">
+    <button class="analyze-btn" onclick="runCompare()">
+      <span>Compare All</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <div id="compare-results" class="compare-results hidden"></div>
+</section>
+
+<!-- MOOD JOURNAL -->
+<section id="journal" class="journal-section">
+  <div class="section-header">
+    <div><p class="section-eyebrow">Daily Check-in</p><h2 class="section-title">Mood Journal</h2></div>
+  </div>
+  <div class="journal-grid">
+    <div class="dash-card journal-form-card">
+      <h3 class="card-title" style="margin-bottom:1rem">Log Today's Mood</h3>
+      <div class="mood-slider-wrap">
+        <div class="mood-emoji-row" id="mood-emoji-row">
+          <span class="mood-emoji active" data-v="1" title="Very Bad">😞</span>
+          <span class="mood-emoji" data-v="2" title="Bad">😟</span>
+          <span class="mood-emoji" data-v="3" title="Okay">😐</span>
+          <span class="mood-emoji" data-v="4" title="Good">🙂</span>
+          <span class="mood-emoji" data-v="5" title="Great">😄</span>
+        </div>
+        <p id="mood-label-text" class="mood-label-text">Very Bad</p>
+      </div>
+      <textarea id="journal-note" class="text-input" placeholder="How are you feeling today? What happened?" rows="3" style="margin:1rem 0"></textarea>
+      <button class="analyze-btn" style="width:100%;justify-content:center" onclick="submitJournal()">
+        <span>Save Entry</span> <span>📓</span>
+      </button>
+    </div>
+    <div class="dash-card journal-history-card">
+      <div class="card-title-row"><h3 class="card-title">Recent Entries</h3><span class="card-icon">📅</span></div>
+      <div id="journal-entries" class="journal-entries"><p class="empty-msg">No entries yet. Log your first mood above.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="dashboard-section">
+  <div class="section-header">
+    <div><p class="section-eyebrow">Analytics</p><h2 class="section-title">Dashboard</h2></div>
+    <button id="refresh-stats" class="refresh-btn">↺ Refresh</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card sc-purple"><div class="stat-icon">📈</div><p class="stat-val" id="total-pred">—</p><p class="stat-label">Total Analyses</p></div>
+    <div class="stat-card sc-teal"><div class="stat-icon">🎯</div><p class="stat-val" id="top-category">—</p><p class="stat-label">Most Common</p></div>
+    <div class="stat-card sc-green"><div class="stat-icon">⚡</div><p class="stat-val" id="model-acc">100%</p><p class="stat-label">Model Accuracy</p></div>
+    <div class="stat-card sc-orange"><div class="stat-icon">💡</div><p class="stat-val" id="avg-conf">—</p><p class="stat-label">Avg Confidence</p></div>
+  </div>
+  <div class="dash-card" style="margin-bottom:1.5rem">
+    <div class="card-title-row"><h3 class="card-title">Category Distribution</h3><span class="card-icon">📊</span></div>
+    <div class="dist-visual" id="global-dist"></div>
+  </div>
+  <div class="dash-card">
+    <div class="card-title-row"><h3 class="card-title">Recent Predictions</h3><span class="card-icon">🕒</span></div>
+    <table class="recent-table">
+      <thead><tr><th>#</th><th>Prediction</th><th>Confidence</th><th>Severity</th><th>Time</th></tr></thead>
+      <tbody id="recent-tbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- WEEKLY -->
+<section id="weekly" class="weekly-section">
+  <div class="section-header">
+    <div><p class="section-eyebrow">Trends</p><h2 class="section-title">Weekly Overview</h2></div>
+    <button class="refresh-btn" onclick="loadWeekly()">↺ Refresh</button>
+  </div>
+  <div class="weekly-grid">
+    <div class="dash-card weekly-chart-card">
+      <div class="card-title-row"><h3 class="card-title">Analyses — Last 7 Days</h3><span class="card-icon">📅</span></div>
+      <div class="weekly-chart-wrap">
+        <svg id="weekly-svg" class="weekly-svg" viewBox="0 0 700 220"></svg>
+      </div>
+    </div>
+    <div class="weekly-summary">
+      <div class="dash-card ws-card"><div class="ws-icon">📆</div><div><p class="ws-val" id="ws-total">0</p><p class="ws-lbl">This Week</p></div></div>
+      <div class="dash-card ws-card"><div class="ws-icon">📈</div><div><p class="ws-val" id="ws-peak">—</p><p class="ws-lbl">Busiest Day</p></div></div>
+      <div class="dash-card ws-card"><div class="ws-icon">🧠</div><div><p class="ws-val" id="ws-top">—</p><p class="ws-lbl">Top Category</p></div></div>
+      <div class="dash-card ws-card"><div class="ws-icon">✅</div><div><p class="ws-val" id="ws-normal">0%</p><p class="ws-lbl">Normal Rate</p></div></div>
+    </div>
+  </div>
+  <div class="dash-card" style="margin-top:1.5rem">
+    <div class="card-title-row"><h3 class="card-title">7-Day Category Heatmap</h3><span class="card-icon">🗓️</span></div>
+    <div id="heatmap" class="heatmap"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="about-section">
+  <div class="section-header">
+    <div><p class="section-eyebrow">System</p><h2 class="section-title">About MindSight</h2></div>
+  </div>
+  <div class="about-grid">
+    <div class="about-card ac-purple">
+      <div class="about-icon">🤖</div>
+      <h3>BERT Architecture</h3>
+      <p>Fine-tuned bert-base-uncased (110M params) with custom 7-class head, AdamW optimizer, linear warmup scheduler, and gradient clipping.</p>
+      <div class="about-tag">110M Parameters</div>
+    </div>
+    <div class="about-card ac-teal">
+      <div class="about-icon">🎯</div>
+      <h3>7-Class Detection</h3>
+      <p>Classifies Normal, Depression, Anxiety, Bipolar Disorder, PTSD, OCD, and Stress with 100% test accuracy on 350-sample held-out set.</p>
+      <div class="about-tag">100% Test Accuracy</div>
+    </div>
+    <div class="about-card ac-orange">
+      <div class="about-icon">🔍</div>
+      <h3>Explainability</h3>
+      <p>Gradient-based token importance scores highlight which words most influenced the AI decision, making predictions transparent.</p>
+      <div class="about-tag">Gradient Attribution</div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-brand">🧠 MindSight · BERT Mental Health AI</div>
+  <p class="footer-sub">Educational purposes only · Crisis support: <strong>988</strong></p>
+</footer>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>

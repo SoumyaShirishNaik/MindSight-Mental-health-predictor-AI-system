@@ -1,0 +1,88 @@
+{
+  "config": {
+    "model_name": "bert-base-uncased",
+    "max_length": 128,
+    "batch_size": 8,
+    "num_epochs": 3,
+    "learning_rate": 2e-05,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "dropout": 0.3,
+    "num_labels": 7,
+    "save_dir": "models/bert_mental_health",
+    "data_dir": "data",
+    "device": "cpu",
+    "seed": 42
+  },
+  "best_epoch": 1,
+  "best_val_f1": 1.0,
+  "test_accuracy": 1.0,
+  "test_f1_weighted": 1.0,
+  "classification_report": {
+    "Normal": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "Depression": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "Anxiety": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "Bipolar Disorder": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "PTSD": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "OCD": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "Stress": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 50.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 350.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 350.0
+    }
+  },
+  "label_names": [
+    "Normal",
+    "Depression",
+    "Anxiety",
+    "Bipolar Disorder",
+    "PTSD",
+    "OCD",
+    "Stress"
+  ],
+  "trained_at": "2026-04-29T23:40:02.200265"
+}
